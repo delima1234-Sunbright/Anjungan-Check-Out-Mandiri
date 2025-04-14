@@ -1,21 +1,260 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Self Checkout Kiosk - Payment</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Transaction Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- CSS sama seperti sebelumnya -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .container {
+            width: 800px;
+            height: 600px;
+            background-color: #fff;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        main {
+            display: flex;
+            height: 100%;
+        }
+
+        .transaction-details {
+            width: 400px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            font-family: 'Anton', sans-serif;
+            font-size: 32px;
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .transaction-info {
+            display: flex;
+            justify-content: space-between;
+            background-color: #f5f5f5;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 2px;
+        }
+
+        .transaction-left p, .transaction-right p {
+            font-size: 10px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .item {
+            display: flex;
+            align-items: center;
+            background-color: #f5f5f5;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 2px;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-details p {
+            font-size: 12px;
+            margin: 2px 0;
+        }
+
+        .item-details p:nth-child(1),
+        .item-details p:nth-child(2) {
+            font-weight: bold;
+        }
+
+        .item-qty {
+            width: 60px;
+            text-align: center;
+            font-size: 12px;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+            padding: 0 10px;
+        }
+
+        .item-price {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-left: 10px;
+        }
+
+        .item-price p {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .remove-btn {
+            color: #da291c;
+            font-weight: bold;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .total {
+            margin-top: auto;
+            background-color: #e6e6e6;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 2px;
+            margin-top: 20px;
+        }
+
+        .total h2, .total p {
+            font-family: 'Anton', sans-serif;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .payment-method {
+            width: 400px;
+            background-color: #16c47f;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+        }
+
+        .payment-title {
+            font-family: 'Anton', sans-serif;
+            font-size: 32px;
+            margin-bottom: 60px;
+            text-align: center;
+            text-transform: uppercase;
+            color: #000;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .payment-buttons {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .payment-button {
+            display: block;
+            width: 100%;
+            background-color: #da291c;
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Anton', sans-serif;
+            font-size: 28px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-transform: uppercase;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .payment-button:hover {
+            background-color: #c42519;
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                width: 100%;
+                height: auto;
+            }
+            
+            main {
+                flex-direction: column;
+            }
+            
+            .transaction-details, .payment-method {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="kiosk-screen payment-screen">
-        <div class="content">
-            <h1>PILIH METODE</h1>
-            <h2>PEMBAYARAN</h2>
-            <div class="payment-options">
-                <a href="{{ url_for('receipt') }}" class="payment-button">DEBIT CARD</a>
-                <a href="{{ url_for('receipt') }}" class="payment-button">QRIS</a>
+    <div class="container">
+        <main>
+            <div class="transaction-details">
+                <h1 class="section-title">DETAIL TRANSAKSI</h1>
+                <div class="transaction-info">
+                    <div class="transaction-left">
+                        <p>TransactionID: {{ transaction.transaction_id }}</p>
+                        <p>CustomerID: {{ transaction.customer_id }}</p>
+                    </div>
+                    <div class="transaction-right">
+                        <p>TransactionDate: {{ transaction.transaction_date }}</p>
+                    </div>
+                </div>
+                {% if transaction.items %}
+                    {% for item in transaction['products'] %}
+                    <div class="item">
+                        <div class="item-details">
+                            <p>ITEMID : {{ item.item_id }}</p>
+                            <p>{{ item.name }}</p>
+                            <p>@Rp.{{ "{:,}".format(item.price) }}</p>
+                        </div>
+                        <div class="item-qty">
+                            <p>QTY:</p>
+                            <p>{{ item.quantity }}</p>
+                        </div>
+                        <div class="item-price">
+                            <p>Rp.{{ "{:,}".format(item.total_price) }}</p>
+                            <span class="remove-btn">X</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No items in transaction.</p>
+                {% endif %}
+                <div class="total">
+                    <h2>TOTAL</h2>
+                    <p>RP.{{ "{:,}".format(total_amount) }}</p>
+                </div>
             </div>
-        </div>
+            <div class="payment-method">
+                <h1 class="payment-title">PILIH METODE<br>PEMBAYARAN</h1>
+                <div class="payment-buttons">
+                    <a href="{{ url_for('receipt') }}" class="payment-button">DEBIT CARD</a>
+                    <a href="{{ url_for('receipt') }}" class="payment-button">QRIS</a>
+                </div>
+            </div>
+        </main>
     </div>
 </body>
 </html>
