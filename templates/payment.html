@@ -221,11 +221,11 @@
                         <p>TransactionDate: {{ transaction.transaction_date }}</p>
                     </div>
                 </div>
-                {% if transaction.items %}
-                    {% for item in transaction['products'] %}
+                {% if transaction.products %}
+                    {% for item in transaction.products %}
                     <div class="item">
                         <div class="item-details">
-                            <p>ITEMID : {{ item.item_id }}</p>
+                            <p>ITEMID: {{ item.item_id }}</p>
                             <p>{{ item.name }}</p>
                             <p>@Rp.{{ "{:,}".format(item.price) }}</p>
                         </div>
@@ -235,7 +235,7 @@
                         </div>
                         <div class="item-price">
                             <p>Rp.{{ "{:,}".format(item.total_price) }}</p>
-                            <span class="remove-btn">X</span>
+                            <span class="remove-btn" onclick="removeItem('{{ item.name }}')">X</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -248,13 +248,74 @@
                 </div>
             </div>
             <div class="payment-method">
-                <h1 class="payment-title">PILIH METODE<br>PEMBAYARAN</h1>
+                <h1 class="payment-title">PEMBAYARAN</h1>
                 <div class="payment-buttons">
-                    <a href="{{ url_for('receipt') }}" class="payment-button">DEBIT CARD</a>
-                    <a href="{{ url_for('receipt') }}" class="payment-button">QRIS</a>
+                    <button class="payment-button" onclick="initiatePayment()">PAY NOW</button>
+                    <button class="payment-button">NEXT</button>
                 </div>
             </div>
         </main>
     </div>
+
+    <!-- Include Midtrans Snap.js -->
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-DgT73RW4UTD9dsy7"></script>
+    <script>
+        function initiatePayment(method) {
+            fetch('/initiate_payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error initiating payment: ' + data.error);
+                    return;
+                }
+                // Open Snap payment popup
+                window.snap.pay(data.snap_token, {
+                    onSuccess: function(result) {
+                        // Provide feedback and redirect to receipt page
+                        alert('Payment successful! Redirecting to your e-receipt...');
+                        setTimeout(() => {
+                            window.location.href = '/receipt';
+                        }, 1000); // 1-second delay for user feedback
+                    },
+                    onPending: function(result) {
+                        // Optionally handle pending payments
+                        alert('Payment is pending: ' + JSON.stringify(result));
+                    },
+                    onError: function(result) {
+                        alert('Payment failed: ' + JSON.stringify(result));
+                    },
+                    onClose: function() {
+                        alert('You closed the payment popup.');
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error initiating payment.');
+            });
+        }
+
+        function removeItem(name) {
+            fetch(`/remove_item/${encodeURIComponent(name)}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'item_removed') {
+                        window.location.reload(); // Reload to update UI
+                    } else {
+                        alert('Error removing item.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing item:', error);
+                    alert('Error removing item.');
+                });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'932dc83cad1aed7c',t:'MTc0NTA4MDE4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

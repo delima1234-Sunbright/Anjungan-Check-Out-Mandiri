@@ -9,9 +9,22 @@ import sqlite3
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import midtransclient
+import uuid
 
 app = Flask(__name__)
 app.secret_key = 'Delimabrpurba7225'
+
+# Midtrans Configuration (Sandbox)
+MIDTRANS_CLIENT_KEY = 'SB-Mid-client-DgT73RW4UTD9dsy7'  # Replace with your Midtrans Sandbox Client Key
+MIDTRANS_SERVER_KEY = 'SB-Mid-server-GEWrPzhUN6u915Pthmk5n12d'  # Replace with your Midtrans Sandbox Server Key
+
+# Initialize Midtrans Snap API Client
+snap = midtransclient.Snap(
+    is_production=False,  # Sandbox mode
+    server_key='SB-Mid-server-GEWrPzhUN6u915Pthmk5n12d',
+    client_key='SB-Mid-client-DgT73RW4UTD9dsy7'
+)
 
 # Inisialisasi database SQLite
 def init_db():
@@ -142,7 +155,7 @@ def gen_frames():
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-        
+
 def generate_hash_code(text):
     import hashlib
     return abs(int(hashlib.md5(text.encode()).hexdigest(), 16) % (10 ** 10))
@@ -162,22 +175,67 @@ def cart():
 @app.route('/payment')
 def payment():
     transaction = session.get('transaction', None)
-    if not transaction or 'products' not in transaction:  # Change to 'products'
+    if not transaction or not transaction.get('products'):
         return redirect(url_for('cart'))
-        
+    
     # Calculate total amount
     total_amount = sum(item['total_price'] for item in transaction['products'])
     
     return render_template('payment.html', 
                          transaction=transaction,
-                         total_amount=total_amount)
+                         total_amount=total_amount,
+                         midtrans_client_key=MIDTRANS_CLIENT_KEY)
+
+@app.route('/initiate_payment', methods=['POST'])
+def initiate_payment():
+    transaction = session.get('transaction', None)
+    if not transaction or not transaction.get('products'):
+        return jsonify({'error': 'No transaction data'}), 400
+
+    total_amount = sum(item['total_price'] for item in transaction['products'])
+    
+    # Prepare item details for Midtrans
+    item_details = [
+        {
+            'id': item['item_id'],
+            'price': item['price'],
+            'quantity': item['quantity'],
+            'name': name
+        }
+        for name, item in session['transaction']['items'].items()
+    ]
+
+    # Create transaction details
+    transaction_details = {
+        'order_id': f"ORDER-{transaction['transaction_id']}-{uuid.uuid4().hex[:8]}",
+        'gross_amount': total_amount
+    }
+
+    # Customer details
+    customer_details = {
+        'first_name': transaction['customer_id'],
+        'email': f"customer-{transaction['customer_id']}@example.com"  # Placeholder email
+    }
+
+    # Create Snap transaction
+    try:
+        snap_response = snap.create_transaction({
+            'transaction_details': transaction_details,
+            'item_details': item_details,
+            'customer_details': customer_details,
+            'enabled_payments': ['credit_card', 'gopay', 'shopeepay', 'bank_transfer']
+        })
+        snap_token = snap_response['token']
+        return jsonify({'snap_token': snap_token})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/receipt', methods=['GET', 'POST'])
 def receipt():
     if 'transaction' not in session or not scanned_products:
         return redirect(url_for('cart'))
     
-    transaction = session['transaction']  # Get the transaction from session
+    transaction = session['transaction']
     receipt_id = generate_receipt_id()
     total = sum(item['total_price'] for item in transaction['products'])
     
@@ -186,13 +244,12 @@ def receipt():
         if email:
             send_receipt(email, receipt_id, transaction, total)
     
-    # Pass transaction to the template
     return render_template('receipt.html', 
                           receipt_id=receipt_id, 
                           cart=transaction['products'], 
                           total=total, 
                           date=transaction['transaction_date'],
-                          transaction=transaction)  # Add this line
+                          transaction=transaction)
 
 @app.route('/thankyou')
 def thankyou():
@@ -216,7 +273,8 @@ def start_scan():
                 'transaction_id': transaction_id,
                 'customer_id': customer_id,
                 'transaction_date': transaction_date,
-                'items': {}
+                'items': {},
+                'products': []  # Initialize products as a list
             }
         threading.Thread(target=scan_barcode, daemon=True).start()
         return jsonify({"status": "scanning"})
@@ -251,37 +309,41 @@ def remove_item(name):
             del scanned_products[name]
             if name in session['transaction']['items']:
                 del session['transaction']['items'][name]
+            # Update products list
+            session['transaction']['products'] = [
+                item for item in session['transaction']['products']
+                if item['name'] != name
+            ]
             return jsonify({"status": "item_removed"})
         return jsonify({"status": "item_not_found"}), 404
 
 @app.route('/checkout')
 def checkout():
     global scanned_products
-
     if not scanned_products:
         return redirect(url_for('cart'))
     
     transaction_id, customer_id, transaction_date = generate_transaction_details()
     
-    # Create a new dictionary for the session using 'products' instead of 'items'
+    # Create products list for session
+    products = []
+    for name, item in scanned_products.items():
+        products.append({
+            'item_id': str(hash(name) % 100000),
+            'name': name,
+            'price': item['price'],
+            'quantity': item['quantity'],
+            'total_price': item['total_price']
+        })
+    
     session['transaction'] = {
         'transaction_id': transaction_id,
         'customer_id': customer_id,
         'transaction_date': transaction_date,
-        'products': []  # Use 'products' instead of 'items'
+        'items': session.get('transaction', {}).get('items', {}),
+        'products': products
     }
     
-    # Add items to the list
-    for name, item in scanned_products.items():
-        session['transaction']['products'].append({
-            'name': name,
-            'price': item['price'],
-            'quantity': item['quantity'],
-            'total_price': item['price'] * item['quantity'],
-            'category': item['category'],
-            'item_id': hash(name) % 10000000  # Simple hash for ID
-        })
-
     return redirect(url_for('payment'))
 
 def generate_transaction_details():
@@ -365,7 +427,6 @@ def send_receipt(email, receipt_id, transaction, total):
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
         server.login(sender_email, password)
         server.send_message(msg)
-
 
 if __name__ == "__main__":
     init_db()
