@@ -1,20 +1,233 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Self Checkout Kiosk - Thank You</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Self Checkout | CDL Corps</title>
+    <!-- Import the requested fonts from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+20&display=swap" rel="stylesheet">
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        /* Header styles */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #000000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-btn, .language-btn {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid #cccccc;
+            background-color: transparent;
+            cursor: pointer;
+        }
+
+        .language-btn {
+            gap: 8px;
+        }
+
+        .language-btn span {
+            font-size: 1.25rem;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 400; /* Regular */
+        }
+
+        /* Main content styles */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Pixelated font effect */
+        .pixelated {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 0.05em;
+            font-weight: bold;
+            text-transform: uppercase;
+            image-rendering: pixelated;
+        }
+        .jersey-20-regular {
+            font-family: "Jersey 20", sans-serif;
+            font-weight: 500;
+            font-style: normal;
+            font-size: 100px;
+        }
+
+
+        h2 {
+            font-size: 3.75rem;
+            margin-bottom: 4rem;
+        }
+
+        .start-button-container {
+            position: relative;
+        }
+
+        .start-button {
+            background-color: #9f0606;
+            color: white;
+            font-size: 100px;
+            padding: 2rem 24rem;
+            border: none;
+            border-radius: 1.5rem;
+            cursor: pointer;
+
+        }
+
+        .pointer {
+            position: absolute;
+            bottom: -100px;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+        }
+
+        /* Footer styles */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 400;
+        }
+
+        footer p:first-child {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        footer p:last-child {
+            font-size: 1.125rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .header-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            h2 {
+                font-size: 3rem;
+            }
+
+            .start-button {
+                font-size: 2.5rem;
+                padding: 1.5rem 6rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-container {
+                flex-direction: column;
+            }
+
+            h2 {
+                font-size: 3rem;
+            }
+
+            .start-button {
+                font-size: 2rem;
+                padding: 1.25rem 4rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="kiosk-screen thankyou-screen">
-        <div class="content">
-            <h1>TERIMAKASIH SUDAH</h1>
-            <h2>BERBELANJA</h2>
-            <div class="restart">
-                <a href="{{ url_for('welcome') }}" class="restart-button">KEMBALI KE AWAL</a>
-            </div>
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo-n0S1s0w5pXP5BJZvcUJyP7jNv9jlxM.png" alt="CDL Corps Logo" class="logo">
+            <h1>Self Checkout</h1>
         </div>
-    </div>
+        <div class="header-buttons">
+            <button class="volume-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.07 5.93C20.9447 7.80528 21.9979 10.3478 21.9979 13C21.9979 15.6522 20.9447 18.1947 19.07 20.07" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <button class="language-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12H22" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Language</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <h2 class="jersey-20-regular">Thank you for shopping!</h2>
+        <div class="start-button-container">
+            <a href="{{ url_for('welcome') }}" class="start-button jersey-20-regular">Back to Home</a>
+            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Pointer-ioJ1FGizHmpUfu0L5nczifffuvmt4V.png" alt="Pointer" class="pointer">
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>Automated Cashier Machine | CDL Corps</p>
+        <p>2025</p>
+    </footer>
 </body>
 </html>
