@@ -25,6 +25,7 @@ snap = midtransclient.Snap(
     server_key='SB-Mid-server-GEWrPzhUN6u915Pthmk5n12d',
     client_key='SB-Mid-client-DgT73RW4UTD9dsy7'
 )
+#test
 
 # Inisialisasi database SQLite
 def init_db():
