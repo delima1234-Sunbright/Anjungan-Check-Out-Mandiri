@@ -32,14 +32,13 @@ Proyek ini adalah aplikasi web berbasis Flask yang mensimulasikan sistem kasir m
 
 ## Instalasi & Setup
 
-1.  **Clone repository (jika ada) atau salin file ke direktori lokal Anda.**
+1.  **Clone repository**
     ```bash
-    # Jika ini adalah repository Git
-    # git clone [URL_REPOSITORY_ANDA]
+    # git clone https://github.com/delima1234-Sunbright/Anjungan-Check-Out-Mandiri
     # cd [NAMA_DIREKTORI_PROYEK]
     ```
 
-2.  **Buat dan aktifkan virtual environment (direkomendasikan):**
+2.  **Buat dan aktifkan virtual environment:**
     ```bash
     python -m venv venv
     # Windows
@@ -48,52 +47,26 @@ Proyek ini adalah aplikasi web berbasis Flask yang mensimulasikan sistem kasir m
     source venv/bin/activate
     ```
 
-3.  **Install dependensi yang dibutuhkan:**
-    Buat file `requirements.txt` dengan isi berikut:
-    ```txt
-    Flask
-    opencv-python
-    pyzbar
-    pandas
-    openpyxl # Diperlukan pandas untuk membaca/menulis file .xlsx
-    midtransclient
-    ```
-    Kemudian install menggunakan pip:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
 4.  **Konfigurasi Kunci Midtrans:**
-    Buka file `app.py` dan ganti placeholder kunci Midtrans dengan kunci Sandbox Anda:
+    Buka file `app.py` dan ganti placeholder kunci Midtrans dengan kunci Sandbox:
     ```python
-    MIDTRANS_CLIENT_KEY = 'SB-Mid-client-ANDA'  # Ganti dengan Client Key Sandbox Anda
-    MIDTRANS_SERVER_KEY = 'SB-Mid-server-ANDA'  # Ganti dengan Server Key Sandbox Anda
+    MIDTRANS_CLIENT_KEY = 'SB-Mid-client-ANDA'  # Ganti dengan Client Key Sandbox 
+    MIDTRANS_SERVER_KEY = 'SB-Mid-server-ANDA'  # Ganti dengan Server Key Sandbox 
 
     # Dan juga di inisialisasi Snap:
     snap = midtransclient.Snap(
         is_production=False,
-        server_key='SB-Mid-server-ANDA', # Ganti
-        client_key='SB-Mid-client-ANDA'  # Ganti
+        server_key='SB-Mid-server-ANDA', 
+        client_key='SB-Mid-client-ANDA'  
     )
     ```
-6.  **Siapkan File Data Produk:**
-    *   Buat direktori `Data` di root proyek Anda.
-    *   Buat file `Database Product.2csv.csv` di dalam direktori `Data`. Pastikan format kolomnya adalah: `KODE_BARCODE,NAMA,KATEGORI,HARGA,stock`.
-        Contoh isi `Database Product.2csv.csv`:
-        ```csv
-        KODE_BARCODE,NAMA,KATEGORI,HARGA,stock
-        8992761134038,Teh Kotak,Minuman,"Rp 3.500",50
-        8999909177009,Chitato Sapi Panggang,Makanan Ringan,"Rp 10.000",30
-        1234567890123,Buku Tulis,Alat Tulis,"Rp 5.000",100
-        ```
-    *   File `sales.xlsx` akan dibuat secara otomatis saat aplikasi dijalankan pertama kali atau saat transaksi pertama terjadi.
 
 ## Menjalankan Aplikasi
 
 1.  Pastikan virtual environment Anda aktif.
 2.  Jalankan aplikasi Flask:
     ```bash
-    python app.py
+    python Selfcheckout.py
     ```
 3.  Buka browser Anda dan akses `http://127.0.0.1:5000/`.
 
