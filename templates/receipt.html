@@ -3,81 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Self Checkout Kiosk - Receipt</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Self Checkout Kiosk - Print E-Receipt</title>
+    <!-- Import Google Fonts (matching the cart.html and payment.html for consistency) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jersey+20&family=Kanit:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: #f5f5f5;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        * {
+            margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Kanit', sans-serif;
         }
 
-        .receipt-container {
-            width: 90%;
-            max-width: 800px;
-            height : 600px;
-            background-color: #16C47F;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        body {
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header styles */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #000000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-family: "Jersey 20", sans-serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-btn, .language-btn {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid #cccccc;
+            background-color: transparent;
+            cursor: pointer;
+        }
+
+        .language-btn {
+            gap: 8px;
+        }
+
+        .language-btn span {
+            font-size: 1.25rem;
+            font-weight: 400;
+        }
+
+        /* Main content styles */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
+            gap: 20px;
         }
 
         .receipt-title {
+            font-family: "Jersey 20", sans-serif;
+            font-size: 2.5rem;
             text-align: center;
-            font-size: 48px;
-            font-weight: bold;
-            color: #000;
             margin-bottom: 20px;
             text-transform: uppercase;
         }
 
         .receipt-content {
             display: flex;
-            flex-direction: column;
             gap: 20px;
-        }
-
-        @media (min-width: 800px) {
-            .receipt-content {
-                flex-direction: row;
-            }
+            width: 100%;
+            max-width: 1200px;
+            justify-content: center;
         }
 
         .receipt-details {
             flex: 1;
-            background-color: #e0e0e0;
-            border-radius: 15px;
+            border: 2px solid #9f0606;
+            border-radius: 10px;
             padding: 20px;
-        }
-
-        .receipt-actions {
-            flex: 1;
+            background-color: #ffffff;
+            min-height: 200px; /* Minimum height to avoid collapse */
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 20px;
-            padding: 0 20px;
+            gap: 10px;
         }
 
         .transaction-header {
-            border-bottom: 2px dashed #999;
+            border-bottom: 2px dashed #000000;
             padding-bottom: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .transaction-info {
             display: flex;
             justify-content: space-between;
+            font-size: 1rem;
             margin-bottom: 5px;
-            font-size: 14px;
         }
 
         .item-row {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             border-bottom: 1px solid #ccc;
             padding-bottom: 10px;
         }
@@ -102,10 +152,20 @@
             display: flex;
             justify-content: space-between;
             font-weight: bold;
-            font-size: 18px;
-            border-top: 2px dashed #999;
+            font-size: 1.125rem;
+            border-top: 2px dashed #000000;
             padding-top: 10px;
             margin-top: 10px;
+        }
+
+        .receipt-actions {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 20px;
+            padding: 0 20px;
+            max-width: 300px;
         }
 
         .email-form {
@@ -117,55 +177,122 @@
         .email-input {
             padding: 15px;
             border-radius: 10px;
-            border: none;
-            font-size: 16px;
+            border: 1px solid #ccc;
+            font-size: 1rem;
             text-align: center;
+            background-color: #e0e0e0;
         }
 
         .send-button {
-            background-color: #00a651;
+            background-color: #9f0606;
             color: white;
             border: none;
             border-radius: 10px;
-            padding: 20px;
-            font-size: 24px;
+            padding: 15px;
+            font-size: 1.5rem;
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
         }
 
         .no-thanks-button {
-            background-color: #ff0000;
+            background-color: #9f0606;
             color: white;
             border: none;
             border-radius: 10px;
-            padding: 20px;
-            font-size: 24px;
+            padding: 15px;
+            font-size: 1.5rem;
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
             text-decoration: none;
             text-align: center;
         }
+
+        /* Dynamic height based on item count */
+        .receipt-details {
+            height: auto;
+            min-height: 200px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .receipt-content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .receipt-details, .receipt-actions {
+                width: 100%;
+                max-width: none;
+            }
+
+            .send-button, .no-thanks-button {
+                font-size: 1.25rem;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .receipt-title {
+                font-size: 2rem;
+            }
+
+            .transaction-info {
+                font-size: 0.875rem;
+            }
+
+            .send-button, .no-thanks-button {
+                font-size: 1rem;
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="receipt-container">
-        <h1 class="receipt-title">CETAK STRUK</h1>
-        
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo-n0S1s0w5pXP5BJZvcUJyP7jNv9jlxM.png" alt="CDL Corps Logo" class="logo">
+            <h1>Self Checkout</h1>
+        </div>
+        <div class="header-buttons">
+            <button class="volume-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 11.995C17.004 13.3208 16.4774 14.5924 15.54 15.53" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19.07 5.93C20.9447 7.80528 21.9979 10.3478 21.9979 13C21.9979 15.6522 20.9447 18.1947 19.07 20.07" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
+            <button class="language-btn">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M2 12H22" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2Z" stroke="#9f0606" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Language</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <h1 class="receipt-title">Print E-Receipt</h1>
         <div class="receipt-content">
             <div class="receipt-details">
                 <div class="transaction-header">
                     <div class="transaction-info">
-                        <span>Transaction ID:</span>
+                        <span>TransactionID:</span>
                         <span>{{ transaction.transaction_id }}</span>
                     </div>
                     <div class="transaction-info">
-                        <span>Customer ID:</span>
+                        <span>CustomerID:</span>
                         <span>{{ transaction.customer_id }}</span>
                     </div>
                     <div class="transaction-info">
-                        <span>Transaction Date:</span>
+                        <span>TransactionDate:</span>
                         <span>{{ date }}</span>
                     </div>
                 </div>
@@ -174,7 +301,7 @@
                     {% for item in cart %}
                     <div class="item-row">
                         <div class="item-header">
-                            <span>ITEM ID: {{ item.item_id }}</span>
+                            <span>ITEMID: {{ item.item_id }}</span>
                             <span>QTY: {{ item.quantity }}</span>
                         </div>
                         <div class="item-details">
@@ -199,12 +326,20 @@
             
             <div class="receipt-actions">
                 <form class="email-form" method="POST">
-                    <input type="email" name="email" placeholder="Enter your email for e-receipt" class="email-input" required>
-                    <button type="submit" class="send-button">SEND E-RECEIPT</button>
+                    <input type="email" name="email" placeholder="Enter your e-mail" class="email-input" required>
+                    <button type="submit" class="send-button">Send E-Receipt</button>
                 </form>
-                <a href="{{ url_for('thankyou') }}" class="no-thanks-button">NO THANKS</a>
+                <a href="{{ url_for('thankyou') }}" class="no-thanks-button">No, Thanks.</a>
             </div>
         </div>
-    </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>Automated Cashier Machine | CDL Corps</p>
+        <p>2025</p>
+    </footer>
+
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93b6cb9a0f70b02c',t:'MTc0NjUxNjg2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
