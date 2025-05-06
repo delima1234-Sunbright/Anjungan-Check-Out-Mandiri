@@ -1,8 +1,3 @@
-Oke, berdasarkan kode Flask yang Anda berikan, berikut adalah draf `README.md` yang bisa Anda gunakan.
-
----
-
-```markdown
 # Flask Self-Checkout System with Barcode Scanner & Midtrans
 
 Proyek ini adalah aplikasi web berbasis Flask yang mensimulasikan sistem kasir mandiri (self-checkout). Aplikasi ini memungkinkan pengguna untuk memindai barcode produk menggunakan webcam, menambahkan item ke keranjang belanja virtual, dan melanjutkan ke proses pembayaran (simulasi) menggunakan Midtrans (mode Sandbox). Aplikasi juga mencatat penjualan dan mengelola stok produk sederhana.
