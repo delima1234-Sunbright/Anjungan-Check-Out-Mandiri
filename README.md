@@ -87,14 +87,13 @@ Proyek ini adalah aplikasi web berbasis Flask yang mensimulasikan sistem kasir m
 .
 ├── app.py                  # File utama aplikasi Flask
 ├── Data/
-│   ├── Database Product.2csv.csv  # Database produk (harus dibuat manual)
-│   └── sales.xlsx            # Catatan penjualan (dibuat otomatis)
+│   ├── Database Product.2csv.csv  # Database produk (harus buat barcode manual)
+│   └── sales.xlsx            # Catatan penjualan 
 ├── templates/              # Direktori untuk file HTML
 │   ├── welcome.html
 │   ├── cart.html
 │   ├── payment.html
 │   ├── receipt.html
 │   └── thankyou.html
-├── requirements.txt        # Daftar dependensi Python
 └── README.md               # File ini
 ```
