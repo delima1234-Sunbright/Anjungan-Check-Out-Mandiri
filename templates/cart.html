@@ -8,7 +8,315 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jersey+20&family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+<<<<<<< Updated upstream
     <link rel="stylesheet" href="static\style.css">
+=======
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        /* Header styles */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid #000000;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-family: "Jersey 20", sans-serif;
+            font-size: 2.5rem;
+            font-weight: 400;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-btn, .language-btn {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid #cccccc;
+            background-color: transparent;
+            cursor: pointer;
+        }
+
+        .language-btn {
+            gap: 8px;
+        }
+
+        .language-btn span {
+            font-size: 1.25rem;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 400;
+        }
+
+        /* Main content styles */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .content-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            justify-content: center;
+        }
+
+        .scan-section, .cart-section {
+            flex: 1;
+            border: 2px solid #9f0606;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .scan-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .cart-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .cart-section h2 {
+            font-family: "Jersey 20", sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .scan-section img {
+            width: 200px;
+            height: 200px;
+        }
+
+        .scan-section img#video-feed {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        .scan-section p {
+            font-family: "Jersey 20", sans-serif;
+            font-size: 2rem;
+            font-weight: 400;
+            text-align: center;
+        }
+
+        .scan-message {
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.2rem;
+            color: #000;
+            background-color: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .action-button {
+            background-color: #9f0606;
+            color: white;
+            font-size: 2rem;
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 1rem;
+            cursor: pointer;
+            font-family: "Jersey 20", sans-serif;
+            text-transform: uppercase;
+        }
+
+        .action-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Cart list styles */
+        .cart-list {
+            width: 100%;
+            text-align: left;
+            font-family: 'Kanit', sans-serif;
+            font-size: 1.2rem;
+            list-style: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            background-color: #ffffff;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+
+        .cart-item span {
+            flex: 1;
+            padding: 0 5px;
+        }
+
+        .remove-icon {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-family: 'Kanit', sans-serif;
+            text-align: center;
+        }
+
+        .remove-icon:hover {
+            background-color: #cc3333;
+        }
+
+        /* Transaction info styles */
+        .transaction-info {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            background-color: #e0e0e0;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .transaction-left p, .transaction-right p {
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        /* Cart total styles */
+        .cart-total {
+            width: 100%;
+            margin-top: auto;
+            background-color: #e0e0e0;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 5px;
+            font-family: "Jersey 20", sans-serif;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        /* Footer styles */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 400;
+        }
+
+        footer p:first-child {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        footer p:last-child {
+            font-size: 1.125rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .content-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .scan-section, .cart-section {
+                width: 100%;
+            }
+
+            .action-button {
+                font-size: 1.5rem;
+                padding: 0.75rem 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .button-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .action-button {
+                font-size: 1.25rem;
+                padding: 0.5rem 1.5rem;
+            }
+
+            .scan-section img, .scan-section img#video-feed {
+                width: 120px;
+                height: 120px;
+            }
+
+            .cart-section h2 {
+                font-size: 2rem;
+            }
+
+            .scan-section p {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+>>>>>>> Stashed changes
 </head>
 <body>
     <!-- Header -->
