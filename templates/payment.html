@@ -8,231 +8,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        /* Reset and base styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Kanit', sans-serif;
-        }
-
-        body {
-            background-color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header styles */
-        header {
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #000000;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-        }
-
-        h1 {
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
-
-        .header-buttons {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .volume-btn, .language-btn {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            border: 1px solid #cccccc;
-            background-color: transparent;
-            cursor: pointer;
-        }
-
-        .language-btn {
-            gap: 8px;
-        }
-
-        .language-btn span {
-            font-size: 1.25rem;
-            font-weight: 400;
-        }
-
-        /* Main content styles */
-        main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            gap: 32px;
-        }
-
-        .transaction-details {
-            border: 2px solid #9f0606;
-            border-radius: 8px;
-            padding: 24px;
-            width: 100%;
-            max-width: 672px; /* Matches max-w-2xl from Tailwind (approx 672px) */
-            background-color: #ffffff;
-        }
-
-        .transaction-details h2 {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .dashed-line {
-            border-bottom: 2px dashed #000000;
-            margin-bottom: 16px;
-        }
-
-        .transaction-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
-            font-size: 1rem;
-        }
-
-        .transaction-info .transaction-right {
-            text-align: right;
-        }
-
-        .item {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 16px;
-            margin-bottom: 8px;
-            font-size: 1rem;
-        }
-
-        .item-details p {
-            margin-bottom: 4px;
-        }
-
-        .item-qty {
-            text-align: right;
-        }
-
-        .item-qty p {
-            margin-bottom: 4px;
-        }
-
-        .item-qty .remove-btn {
-            color: #da291c;
-            font-weight: bold;
-            font-size: 1.25rem;
-            cursor: pointer;
-            display: inline-block;
-            margin-left: 10px;
-        }
-
-        .total {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        .total .total-qty {
-            text-align: right;
-        }
-
-        .pay-button {
-            background-color: #9f0606;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: bold;
-            padding: 16px 64px;
-            border: none;
-            border-radius: 9999px; /* Matches rounded-full */
-            cursor: pointer;
-            width: 100%;
-            max-width: 448px; /* Matches max-w-md from Tailwind (approx 448px) */
-            text-transform: uppercase;
-        }
-
-        .pay-button:hover {
-            background-color: #7f0505;
-        }
-
-        /* Footer styles */
-        footer {
-            padding: 24px;
-            text-align: center;
-        }
-
-        footer p {
-            font-size: 1.25rem;
-            margin-bottom: 8px;
-        }
-
-        footer p:last-child {
-            font-size: 1.125rem;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .transaction-details {
-                padding: 16px;
-            }
-
-            .pay-button {
-                padding: 12px 32px;
-                font-size: 1.25rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .transaction-info, .item, .total {
-                grid-template-columns: 1fr;
-                text-align: left;
-            }
-
-            .transaction-info .transaction-right,
-            .item-qty,
-            .total .total-qty {
-                text-align: left;
-            }
-
-            .pay-button {
-                padding: 10px 24px;
-                font-size: 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="static\style.css">
 </head>
 <body>
     <!-- Header -->
     <header>
         <div class="logo-container">
-            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo-n0S1s0w5pXP5BJZvcUJyP7jNv9jlxM.png" alt="CDL Corps Logo" className="logo">
+            <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Logo-n0S1s0w5pXP5BJZvcUJyP7jNv9jlxM.png" alt="CDL Corps Logo" class="logo">
             <h1>Self Checkout</h1>
         </div>
         <div class="header-buttons">
@@ -280,7 +62,6 @@
                     <div class="item-qty">
                         <p>QTY: {{ item.quantity }}</p>
                         <p>Rp.{{ "{:,}".format(item.total_price) }}</p>
-                        <span class="remove-btn" onclick="removeItem('{{ item.name }}')">X</span>
                     </div>
                 </div>
                 {% endfor %}
@@ -288,7 +69,6 @@
                 <p>No items in transaction.</p>
             {% endif %}
             <div class="total">
-=total">
                 <div class="total-details">
                     <p>TOTAL ITEM</p>
                 </div>

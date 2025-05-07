@@ -6,27 +6,40 @@ import time
 import pandas as pd
 from datetime import datetime
 import sqlite3
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 import midtransclient
 import uuid
+import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 app = Flask(__name__)
 app.secret_key = 'Delimabrpurba7225'
 
 # Midtrans Configuration (Sandbox)
-MIDTRANS_CLIENT_KEY = 'SB-Mid-client-DgT73RW4UTD9dsy7'  # Replace with your Midtrans Sandbox Client Key
-MIDTRANS_SERVER_KEY = 'SB-Mid-server-GEWrPzhUN6u915Pthmk5n12d'  # Replace with your Midtrans Sandbox Server Key
+MIDTRANS_CLIENT_KEY = 'SB-Mid-client-DgT73RW4UTD9dsy7'
+MIDTRANS_SERVER_KEY = 'SB-Mid-server-GEWrPzhUN6u915Pthmk5n12d'
 
 # Initialize Midtrans Snap API Client
 snap = midtransclient.Snap(
-    is_production=False,  # Sandbox mode
-    server_key='SB-Mid-server-GEWrPzhUN6u915Pthmk5n12d',
-    client_key='SB-Mid-client-DgT73RW4UTD9dsy7'
+    is_production=False,
+    server_key=MIDTRANS_SERVER_KEY,
+    client_key=MIDTRANS_CLIENT_KEY
 )
 
-# Inisialisasi database SQLite
+# CSV File path for products
+PRODUCTS_CSV_PATH = 'Data/Database Product.2csv.csv'
+
+# Load product database from CSV
+try:
+    df = pd.read_csv(PRODUCTS_CSV_PATH)
+    df.columns = df.columns.str.strip()
+except Exception as e:
+    logging.error(f"Error loading product database: {e}")
+    df = pd.DataFrame(columns=['KODE_BARCODE', 'NAMA', 'KATEGORI', 'HARGA'])
+
+# Initialize SQLite database
 def init_db():
     conn = sqlite3.connect('sales.db')
     c = conn.cursor()
@@ -45,18 +58,14 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Load product database dari CSV dan masukkan ke SQLite jika belum ada
-file_path = 'Data\Database Product.2csv.csv'
-df = pd.read_csv(file_path)
-df.columns = df.columns.str.strip()
-
+# Populate products table from CSV
 def populate_products_db():
     conn = sqlite3.connect('sales.db')
     c = conn.cursor()
     for _, row in df.iterrows():
         c.execute('''INSERT OR IGNORE INTO products (KODE_BARCODE, NAMA, KATEGORI, HARGA, stock)
-                     VALUES (?, ?, ?, ?, ?)''',
-                  (row['KODE_BARCODE'], row['NAMA'], row['KATEGORI'], row['HARGA'], 100))  # Stok awal 100
+                    VALUES (?, ?, ?, ?, ?)''',
+                (row['KODE_BARCODE'], row['NAMA'], row['KATEGORI'], row['HARGA'], 100))
     conn.commit()
     conn.close()
 
@@ -77,12 +86,15 @@ def cari_produk(barcode):
         barcode = float(barcode)
         c.execute("SELECT NAMA, KATEGORI, HARGA, stock FROM products WHERE KODE_BARCODE = ?", (barcode,))
         result = c.fetchone()
-        if result and result[3] > 0:  # Cek stok
+        if result and result[3] > 0:
             name, category, price_str, stock = result
             price = int(price_str.replace('Rp', '').replace('.', '').strip())
+            logging.info(f"Product found: {name} for barcode: {barcode}")
             return {'name': name, 'category': category, 'price': price, 'stock': stock}
+        else:
+            logging.info(f"No product found or stock is 0 for barcode: {barcode}")
     except ValueError:
-        pass
+        logging.error(f"Invalid barcode format: {barcode}")
     finally:
         conn.close()
     return None
@@ -127,12 +139,6 @@ def scan_barcode():
                     scanned_products[produk['name']]['total_price'] = (
                         scanned_products[produk['name']]['price'] * scanned_products[produk['name']]['quantity']
                     )
-                    session['transaction']['items'][produk['name']] = {
-                        'item_id': str(hash(produk['name']) % 100000),
-                        'price': produk['price'],
-                        'quantity': scanned_products[produk['name']]['quantity'],
-                        'total_price': scanned_products[produk['name']]['total_price']
-                    }
                 last_barcode = barcode_data
                 last_detected_time = current_time
         time.sleep(0.1)
@@ -146,9 +152,6 @@ def gen_frames():
         ret, frame = camera.read()
         if not ret:
             break
-        if latest_product:
-            text = f"Name: {latest_product['name']} | Price: Rp{latest_product['price']:,}"
-            cv2.putText(frame, text, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
         ret, buffer = cv2.imencode('.jpg', frame)
         if not ret:
             continue
@@ -178,7 +181,6 @@ def payment():
     if not transaction or not transaction.get('products'):
         return redirect(url_for('cart'))
     
-    # Calculate total amount
     total_amount = sum(item['total_price'] for item in transaction['products'])
     
     return render_template('payment.html', 
@@ -194,7 +196,6 @@ def initiate_payment():
 
     total_amount = sum(item['total_price'] for item in transaction['products'])
     
-    # Prepare item details for Midtrans
     item_details = [
         {
             'id': item['item_id'],
@@ -205,19 +206,16 @@ def initiate_payment():
         for name, item in session['transaction']['items'].items()
     ]
 
-    # Create transaction details
     transaction_details = {
         'order_id': f"ORDER-{transaction['transaction_id']}-{uuid.uuid4().hex[:8]}",
         'gross_amount': total_amount
     }
 
-    # Customer details
     customer_details = {
         'first_name': transaction['customer_id'],
-        'email': f"customer-{transaction['customer_id']}@example.com"  # Placeholder email
+        'email': f"customer-{transaction['customer_id']}@example.com"
     }
 
-    # Create Snap transaction
     try:
         snap_response = snap.create_transaction({
             'transaction_details': transaction_details,
@@ -228,9 +226,10 @@ def initiate_payment():
         snap_token = snap_response['token']
         return jsonify({'snap_token': snap_token})
     except Exception as e:
+        logging.error(f"Payment initiation error: {e}")
         return jsonify({'error': str(e)}), 500
 
-@app.route('/receipt', methods=['GET', 'POST'])
+@app.route('/receipt', methods=['GET'])
 def receipt():
     if 'transaction' not in session or not scanned_products:
         return redirect(url_for('cart'))
@@ -238,11 +237,6 @@ def receipt():
     transaction = session['transaction']
     receipt_id = generate_receipt_id()
     total = sum(item['total_price'] for item in transaction['products'])
-    
-    if request.method == 'POST':
-        email = request.form.get('email')
-        if email:
-            send_receipt(email, receipt_id, transaction, total)
     
     return render_template('receipt.html', 
                           receipt_id=receipt_id, 
@@ -255,11 +249,17 @@ def receipt():
 def thankyou():
     global scanned_products
     if 'transaction' in session:
-        save_to_sales_db(session['transaction']['transaction_id'], session['transaction']['customer_id'],
-                         session['transaction']['products'], sum(item['total_price'] for item in session['transaction']['products']))
+        total_price = sum(item['total_price'] for item in session['transaction']['products'])
+        save_to_sales_db(session['transaction']['transaction_id'], 
+                        session['transaction']['customer_id'],
+                        session['transaction']['products'], 
+                        total_price)
+        
         update_stock(scanned_products)
+        
         session.pop('transaction')
         scanned_products = {}
+    
     return render_template('thankyou.html')
 
 @app.route('/start_scan')
@@ -274,21 +274,34 @@ def start_scan():
                 'customer_id': customer_id,
                 'transaction_date': transaction_date,
                 'items': {},
-                'products': []  # Initialize products as a list
+                'products': []
             }
         threading.Thread(target=scan_barcode, daemon=True).start()
+        logging.info("Scanning started.")
         return jsonify({"status": "scanning"})
+    logging.info("Scan already active.")
     return jsonify({"status": "already_scanning"})
 
 @app.route('/video_feed')
 def video_feed():
     if not camera_active:
+        logging.error("Camera not active for video feed.")
         return jsonify({"error": "Camera not active"}), 400
     return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/cart_data')
 def cart_data():
     with camera_lock:
+        # Update session with scanned products
+        if 'transaction' in session:
+            for name, item in scanned_products.items():
+                session['transaction']['items'][name] = {
+                    'item_id': str(hash(name) % 100000),
+                    'price': item['price'],
+                    'quantity': item['quantity'],
+                    'total_price': item['total_price']
+                }
+            session.modified = True  # Mark session as modified
         return jsonify(scanned_products)
 
 @app.route('/stop_scan')
@@ -299,6 +312,7 @@ def stop_scan():
         if camera and camera.isOpened():
             camera.release()
             camera = None
+            logging.info("Camera stopped and released.")
     return jsonify({"status": "stopped"})
 
 @app.route('/remove_item/<name>', methods=['POST'])
@@ -309,23 +323,25 @@ def remove_item(name):
             del scanned_products[name]
             if name in session['transaction']['items']:
                 del session['transaction']['items'][name]
-            # Update products list
             session['transaction']['products'] = [
                 item for item in session['transaction']['products']
                 if item['name'] != name
             ]
+            session.modified = True
+            logging.info(f"Removed item: {name}")
             return jsonify({"status": "item_removed"})
+        logging.warning(f"Item not found: {name}")
         return jsonify({"status": "item_not_found"}), 404
 
 @app.route('/checkout')
 def checkout():
     global scanned_products
     if not scanned_products:
+        logging.info("No products in cart, redirecting to cart.")
         return redirect(url_for('cart'))
     
     transaction_id, customer_id, transaction_date = generate_transaction_details()
     
-    # Create products list for session
     products = []
     for name, item in scanned_products.items():
         products.append({
@@ -343,6 +359,8 @@ def checkout():
         'items': session.get('transaction', {}).get('items', {}),
         'products': products
     }
+    session.modified = True
+    logging.info("Checkout initiated.")
     
     return redirect(url_for('payment'))
 
@@ -357,6 +375,7 @@ def generate_transaction_details():
     customer_id = f"CUST-{today_date}-{customer_count:03d}"
     transaction_date = datetime.now().strftime('%Y-%m-%d')
     conn.close()
+    logging.info(f"Generated transaction details: {transaction_id}, {customer_id}")
     return transaction_id, customer_id, transaction_date
 
 def generate_receipt_id():
@@ -366,6 +385,7 @@ def generate_receipt_id():
     c.execute("SELECT COUNT(*) FROM sales WHERE transactionID LIKE ?", (f"{today}%",))
     counter = c.fetchone()[0] + 1
     conn.close()
+    logging.info(f"Generated receipt ID: RCT-{today}-{counter:04d}")
     return f"RCT-{today}-{counter:04d}"
 
 def save_to_sales_db(transaction_id, customer_id, products, total):
@@ -376,6 +396,7 @@ def save_to_sales_db(transaction_id, customer_id, products, total):
               (transaction_id, customer_id, str(products), total, datetime.now().strftime('%Y-%m-%d')))
     conn.commit()
     conn.close()
+    logging.info(f"Saved transaction {transaction_id} to database.")
 
 def update_stock(products):
     conn = sqlite3.connect('sales.db')
@@ -385,48 +406,7 @@ def update_stock(products):
                   (details['quantity'], product_name))
     conn.commit()
     conn.close()
-
-def send_receipt(email, receipt_id, transaction, total):
-    sender_email = "your_email@gmail.com"  # Ganti dengan email Anda
-    password = "your_app_password"         # Gunakan app password, bukan password biasa
-
-    msg = MIMEMultipart("alternative")
-    msg['From'] = sender_email
-    msg['To'] = email
-    msg['Subject'] = "Your E-Receipt (Anjungan Check Out Mandiri)"
-
-    body = f"Receipt ID: {receipt_id}\nTransaction ID: {transaction['transaction_id']}\nCustomer ID: {transaction['customer_id']}\nDate: {transaction['transaction_date']}\n\nItems:\n"
-    for item in transaction['products']:
-        body += f"- {item['name']}: {item['quantity']} x Rp{item['price']:,} = Rp{item['total_price']:,}\n"
-    body += f"\nTotal: Rp{total:,}"
-
-    html_body = f"""
-    <html>
-    <body>
-        <h2>Your E-Receipt</h2>
-        <p><strong>Receipt ID:</strong> {receipt_id}</p>
-        <p><strong>Transaction ID:</strong> {transaction['transaction_id']}</p>
-        <p><strong>Customer ID:</strong> {transaction['customer_id']}</p>
-        <p><strong>Date:</strong> {transaction['transaction_date']}</p>
-        <h3>Items:</h3>
-        <ul>
-    """
-    for item in transaction['products']:
-        html_body += f"<li>{item['name']}: {item['quantity']} x Rp{item['price']:,} = Rp{item['total_price']:,}</li>"
-    html_body += f"""
-        </ul>
-        <h3>Total: Rp{total:,}</h3>
-        <p>Thank you for shopping with us!</p>
-    </body>
-    </html>
-    """
-
-    msg.attach(MIMEText(body, 'plain'))
-    msg.attach(MIMEText(html_body, 'html'))
-
-    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-        server.login(sender_email, password)
-        server.send_message(msg)
+    logging.info("Updated stock in database.")
 
 if __name__ == "__main__":
     init_db()
@@ -436,3 +416,4 @@ if __name__ == "__main__":
     finally:
         if camera and camera.isOpened():
             camera.release()
+            logging.info("Camera released on shutdown.")
