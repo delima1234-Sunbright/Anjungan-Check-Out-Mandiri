@@ -80,20 +80,3 @@ Proyek ini adalah aplikasi web berbasis Flask yang mensimulasikan sistem kasir m
 6.  **Proses Pembayaran Midtrans**: Pengguna akan diarahkan ke antarmuka Midtrans Snap untuk menyelesaikan pembayaran (simulasi di Sandbox).
 7.  **Halaman Terima Kasih (`/thankyou`)**: Setelah pembayaran (disimulasikan berhasil atau kembali dari Midtrans), pengguna akan diarahkan ke halaman terima kasih. Pada tahap ini, data penjualan disimpan dan stok diperbarui.
 8.  **Struk (`/receipt`)**: Pengguna dapat melihat struk transaksi dan memasukkan email untuk menerima struk elektronik.
-
-## Struktur File (Penting)
-
-```
-.
-├── app.py                  # File utama aplikasi Flask
-├── Data/
-│   ├── Database Product.2csv.csv  # Database produk (harus buat barcode manual)
-│   └── sales.xlsx            # Catatan penjualan 
-├── templates/              # Direktori untuk file HTML
-│   ├── welcome.html
-│   ├── cart.html
-│   ├── payment.html
-│   ├── receipt.html
-│   └── thankyou.html
-└── README.md               # File ini
-```
